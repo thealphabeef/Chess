@@ -37,6 +37,7 @@ class ChessModel:
         self.__nrows = 8
         self.__ncols = 8
         self.__message_code = MoveValidity.Valid
+        self.__move_history: list[dict] = []
 
         #initialize board
         self.board = [[None] * self.__ncols for _ in range(self.__nrows)]
@@ -99,11 +100,32 @@ class ChessModel:
             return False
 
         piece = self.board[move.from_row][move.from_col]
+        captured_piece = self.board[move.to_row][move.to_col]
+        piece_snapshot = self._snapshot_piece_state(piece)
+
+        history_entry = {
+            'move': move,
+            'piece': piece,
+            'captured': captured_piece,
+            'piece_snapshot': piece_snapshot,
+            'player_before': self.__player,
+            'promotion': False,
+        }
         self.board[move.from_row][move.from_col] = None
-        self.board[move.to_row][move.to_col] = piece
 
         if isinstance(piece, Pawn):
             piece.first_move = False
+            if (piece.player == Player.WHITE and move.to_row == 0) or (
+                piece.player == Player.BLACK and move.to_row == self.__nrows - 1
+            ):
+                self.board[move.to_row][move.to_col] = Queen(piece.player)
+                history_entry['promotion'] = True
+            else:
+                self.board[move.to_row][move.to_col] = piece
+        else:
+            self.board[move.to_row][move.to_col] = piece
+
+        self.__move_history.append(history_entry)
 
         self.set_next_player()
         return True
@@ -254,7 +276,21 @@ class ChessModel:
 
     def undo(self):
         #undo the most recent move.
-        pass
+        if not self.__move_history:
+            raise UndoException('No moves to undo.')
+
+        last_move = self.__move_history.pop()
+        move = last_move['move']
+        piece = last_move['piece']
+        captured_piece = last_move['captured']
+
+        self.board[move.to_row][move.to_col] = captured_piece
+        self.board[move.from_row][move.from_col] = piece
+
+        self._restore_piece_state(piece, last_move['piece_snapshot'])
+        self.__player = last_move['player_before']
+        self.__message_code = MoveValidity.Valid
+
 
     def initialize_board(self):
         #put all the pieces into their places on the board
