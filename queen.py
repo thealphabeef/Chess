@@ -1,18 +1,41 @@
 from chess_piece import ChessPiece
 from move import Move
 
-
 class Queen(ChessPiece):
     def __init__(self, player):
+        """Initialize a queen chess piece.
+
+        Args:
+            player (Player): Owner of the queen.
+        """
         super().__init__(player)
 
     def __str__(self) -> str:
+        """Returns the readable name of the queen.
+
+        Returns:
+            str: The string ''"Queen"''.
+        """
         return 'Queen'
 
     def type(self) -> str:
+        """Returns the display type for the queen.
+
+        Returns:
+            str: The type name ''"Queen"''.
+        """
         return 'Queen'
 
-    def is_valid_move(self, move: Move, board: list[list["ChessPiece"]]) -> bool:
+    def is_valid_move(self, move: Move, board: list[list[ChessPiece]]) -> bool:
+        """Determine whether a move is legal for a queen.
+
+        Args:
+            move (Move): The candidate move for the queen.
+            board (list[list[ChessPiece]]): The current board state.
+
+        Returns:
+            bool: ''True'' if the queen can legally execute the move, ''False'' otherwise.
+        """
         if not super().is_valid_move(move, board):
             return False
 

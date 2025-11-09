@@ -5,6 +5,11 @@ class Player(Enum):
     WHITE = 1
 
     def next(self):
+        """Return the opposing player.
+
+        Returns:
+            Player: The next player in turn order.
+        """
         cls = self.__class__
         members = list(cls)
         index = members.index(self) + 1

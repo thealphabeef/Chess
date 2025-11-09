@@ -4,21 +4,36 @@ from player import Player
 
 class ChessPiece(ABC):
     def __init__(self, player: Player):
+        """Initialize a chess piece.
+
+        Args:
+            player (Player): Owner of the piece.
+        """
         self.__player = player
 
     @property
     def player(self) -> Player:
+        """Player: The owner of the piece."""
         return self.__player
 
     @abstractmethod
     def __str__(self) -> str:
-        pass
+        """Return the readable name for the piece."""
 
     @abstractmethod
     def type(self) -> str:
-        pass
+        """Return the display type for the piece."""
 
     def is_valid_move(self, move: Move, board: list[list['ChessPiece']]) -> bool:
+        """Check structural movement rules shared by all pieces.
+
+        Args:
+            move (Move): The proposed move.
+            board (list[list['ChessPiece']]): The board to validate against.
+
+        Returns:
+            bool: ''True'' if the move satisfies the base constraints, ''False'' otherwise.
+        """
         rows = len(board)
         cols = len(board[0]) if rows > 0 else 0
 

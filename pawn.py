@@ -2,19 +2,43 @@ from chess_piece import ChessPiece
 from move import Move
 from player import Player
 
-
 class Pawn(ChessPiece):
     def __init__(self, player: Player, first_move: bool = True):
+        """Initialize a pawn chess piece.
+
+        Args:
+            player (Player): Owner of the bishop.
+            first_move (bool): Whether the pawn has moved. before. Defaults to True.
+        """
         super().__init__(player)
         self.first_move = first_move
 
     def __str__(self) -> str:
+        """Returns the readable name of the pawn.
+
+        Returns:
+            str: The string ''"Pawn"''
+        """
         return "Pawn"
 
     def type(self) -> str:
+        """Return the display type for the pawn.
+
+        Returns:
+            str: The type name ''"Pawn"''
+        """
         return "Pawn"
 
-    def is_valid_move(self, move: Move, board: list[list["ChessPiece"]]) -> bool:
+    def is_valid_move(self, move: Move, board: list[list[ChessPiece]]) -> bool:
+        """Determine whether a move is legal for a pawn.
+
+        Args:
+            move (Move): The candidate move for the pawn.
+            board (list[list[ChessPiece]]): The current board state.
+
+        Returns:
+            bool: ''True'' if the pawn can legally execute the move, ''False'' otherwise.
+        """
         if not super().is_valid_move(move, board):
             return False
 

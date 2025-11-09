@@ -1,18 +1,41 @@
 from chess_piece import ChessPiece
 from move import Move
 
-
 class Rook(ChessPiece):
     def __init__(self, player):
+        """Initialize a rook chess piece.
+
+        Args:
+            player (Player): Owner of the rook.
+        """
         super().__init__(player)
 
     def __str__(self) -> str:
+        """Return the readable name of the rook.
+
+        Returns:
+            str: The string ''"Rook"''
+        """
         return 'Rook'
 
     def type(self) -> str:
+        """Return the display type of the rook.
+
+        Returns:
+            str: The type name ''"Rook"''
+        """
         return 'Rook'
 
-    def is_valid_move(self, move: Move, board: list[list["ChessPiece"]]) -> bool:
+    def is_valid_move(self, move: Move, board: list[list[ChessPiece]]) -> bool:
+        """Determine whether a move is legal for a rook.
+
+        Args:
+            move (Move): The candidate move for the rook.
+            board (list[list[ChessPiece]]): The current board state.
+
+        Returns:
+            bool: ''True'' if the rook can legally execute the move, ''False'' otherwise.
+        """
         if not super().is_valid_move(move, board):
             return False
 

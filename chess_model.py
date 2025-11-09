@@ -11,12 +11,18 @@ from king import King
 from move import Move
 
 class MoveValidity(Enum):
+    """Enumeration describing the result of validating a potential move."""
     Valid = 1
     Invalid = 2
     MovingIntoCheck = 3
     StayingInCheck = 4
 
     def __str__(self):
+        """Return a readable message for the move status.
+
+        Returns:
+            str: The descriptive message associated with the enum value.
+        """
         if self.value == 2:
             return 'Invalid move.'
 
@@ -26,13 +32,13 @@ class MoveValidity(Enum):
         if self.value == 4:
             return 'Invalid -- must move out of check.'
 
-
-# TODO: create UndoException
 class UndoException(Exception):
-    pass
+    """Exception raised when an undo operation cannot be performed."""
 
 class ChessModel:
+    """Game Engine responsible for move validation, execution, and status."""
     def __init__(self):
+        """Initialize a new chess model with the standard setup."""
         self.__player = Player.WHITE
         self.__nrows = 8
         self.__ncols = 8
@@ -42,26 +48,35 @@ class ChessModel:
         #initialize board
         self.board = [[None] * self.__ncols for _ in range(self.__nrows)]
         self.initialize_board()
+
     #Read Only Properties
     @property
     def nrows(self) -> int:
+        """int: Number of rows on the chess board."""
         return self.__nrows
 
     @property
     def ncols(self) -> int:
+        """int: Number of columns on the chess board."""
         return self.__ncols
 
     @property
     def current_player(self) -> Player:
+        """Player: The player whose turn it is to move."""
         return self.__player
 
     @property
     def message_code(self) -> MoveValidity:
+        """MoveValidity: Outcome of the most recent move validation."""
         return self.__message_code
 
     #start of our ChessModel main methods
     def is_complete(self) -> bool:
-        #The game is complete if the current player has no legal move (checkmate or stalemate).
+        """Determine whether the current player has any legal moves remaining.
+
+        Returns:
+            bool: ''True'' if the game is over (checkmate or stalemate), ''False'' otherwise.
+        """
         for r in range(self.__nrows):
             for c in range(self.__ncols):
                 piece = self.board[r][c]
@@ -86,13 +101,27 @@ class ChessModel:
         return True
 
     def is_valid_move(self, move: Move) -> bool:
-        # game level move logic, setting the __message_code for each check
+        """Validate a move request at the game level.
+
+        Args:
+            move (Move): The proposed move.
+
+        Returns:
+            bool: ''True'' if the move is legal, ''False'' otherwise.
+        """
         legal, code = self._assess_move(move)
         self.__message_code = code
         return legal
 
     def move(self, move: Move):
-        #actually execute the move if its valid
+        """Execute a move if it is valid and update game state.
+
+        Args:
+            move (Move): The move to execute.
+
+        Returns:
+            bool: ''True'' if the move was performed, ''False'' otherwise.
+        """
         legal, code = self._assess_move(move)
         self.__message_code = code
 
@@ -131,6 +160,14 @@ class ChessModel:
         return True
 
     def _assess_move(self, move: Move) -> tuple[bool, MoveValidity]:
+        """Evaluate a move without mutating persistent state.
+
+        Args:
+            move (Move): The move to evaluate.
+
+        Returns:
+            tuple[bool, MoveValidity]: Pair of legality flag and explanatory code.
+        """
         fr, fc, tr, tc = move.from_row, move.from_col, move.to_row, move.to_col
 
         if not (0 <= fr < self.__nrows and 0 <= fc < self.__ncols and
@@ -165,15 +202,37 @@ class ChessModel:
 
 
     def _snapshot_piece_state(self, piece: ChessPiece) -> dict:
+        """Capture mutable attributes of a piece for later restoration.
+
+        Args:
+            piece (ChessPiece): The piece whose state should be recorded.
+
+        Returns:
+            dict: Serialized state needed to undo a move for the piece.
+        """
         if isinstance(piece, Pawn):
             return {'first_move': piece.first_move}
         return {}
 
     def _restore_piece_state(self, piece: ChessPiece, snapshot: dict) -> None:
+        """Restore mutable piece attributes from a snapshot.
+
+        Args:
+            piece (ChessPiece): The piece whose state should be restored.
+            snapshot (dict): The snapshot previously returned by ''_snapshot_piece_state''.
+        """
         if isinstance(piece, Pawn) and 'first_move' in snapshot:
             piece.first_move = snapshot['first_move']
+
     def in_check(self, p: Player):
-        #return true if our players king is currently being attacked by any opponent piece
+        """Determine whether the specified player is in check.
+
+        Args:
+            p (Player): The player to evaluate.
+
+        Returns:
+            bool: ''True'' if the player's king is threatened, ''False'' otherwise.
+        """
         king_position = None
 
         #locate king for the current player
@@ -190,6 +249,15 @@ class ChessModel:
 
         #local method for our movement checks so that they dont check off screen
         def on_board(row: int, col: int) -> bool:
+            """Check whether coordinates fall within the board boundaries.
+
+            Args:
+                row (int): Row index to validate.
+                col (Int): Column index to validate.
+
+            Returns:
+                bool: ''True'' if the coordinates are on the board, ''False'' otherwise.
+            """
             return 0 <= row < self.__nrows and 0 <= col < self.__ncols
 
         #check every opponent piece to see if it can attack the king :D
@@ -255,18 +323,39 @@ class ChessModel:
         return False
 
     def piece_at(self, row: int, col: int) -> ChessPiece:
-        #given a row and a column return the piece if it's at that pos
+        """Retrieve the piece located at the specified coordinates.
+
+        Args:
+            row (int): The row index of the target square.
+            col (int): The column index of the target square.
+
+        Returns:
+            ChessPiece: The piece at the requested position, or ''None'' if empty.
+
+        Raises:
+            IndexError: If the coordinates fall outside of the board.
+        """
         if not (0 <= row < self.__nrows and 0 <= col < self.__ncols):
             raise IndexError('out of bounds')
 
         return self.board[row][col]
 
     def set_next_player(self):
-        #set the next player
+        """Advance the active player to the opponent."""
         self.__player = self.__player.next()
 
     def set_piece(self, row:int, col:int, piece:ChessPiece):
-        #set our piece
+        """Place a piece on the board at the specified location.
+
+        Args:
+            row (int): Target row index.
+            col (int): Target column index.
+            piece (ChessPiece): The piece to place or ''None'' to clear the square.
+
+        Raises:
+            IndexError: If the target square is off the board.
+            TypeError: If ''piece'' is not a ''ChessPiece'' or ''None''.
+        """
         if not (0 <= row < self.__nrows and 0 <= col < self.__ncols):
             raise IndexError('out of bounds')
 
@@ -275,7 +364,11 @@ class ChessModel:
         self.board[row][col] = piece
 
     def undo(self):
-        #undo the most recent move.
+        """Undo the most recent move.
+
+        Raises:
+            UndoException: If there is no move to undo.
+        """
         if not self.__move_history:
             raise UndoException('No moves to undo.')
 
@@ -293,7 +386,7 @@ class ChessModel:
 
 
     def initialize_board(self):
-        #put all the pieces into their places on the board
+        """Populate the board with the standard chess starting arrangement."""
 
         #BLACK ROWS
         self.board[0] = [Rook(Player.BLACK), Knight(Player.BLACK), Bishop(Player.BLACK), Queen(Player.BLACK),
@@ -305,9 +398,3 @@ class ChessModel:
         self.board[7] = [Rook(Player.WHITE), Knight(Player.WHITE), Bishop(Player.WHITE), Queen(Player.WHITE),
                          King(Player.WHITE), Bishop(Player.WHITE), Knight(Player.WHITE), Rook(Player.WHITE)]
         self.board[6] = [Pawn(Player.WHITE) for col in range(self.ncols)]
-
-
-
-
-
-
