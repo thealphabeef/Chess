@@ -3,12 +3,18 @@ from move import Move
 from player import Player
 
 class Pawn(ChessPiece):
+    """Represents a Pawn piece.
+
+    Attributes:
+        player (Player): Owner of the Pawn.
+        first_move (bool): Whether the Pawn is on the first move.
+    """
     def __init__(self, player: Player, first_move: bool = True):
         """Initialize a pawn chess piece.
 
         Args:
-            player (Player): Owner of the bishop.
-            first_move (bool): Whether the pawn has moved. before. Defaults to True.
+            player (Player): Owner of the Pawn.
+            first_move (bool): Whether the pawn has moved before. Defaults to True.
         """
         super().__init__(player)
         self.first_move = first_move

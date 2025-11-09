@@ -11,7 +11,14 @@ from king import King
 from move import Move
 
 class MoveValidity(Enum):
-    """Enumeration describing the result of validating a potential move."""
+    """Enumeration describing the result of validating a potential move.
+
+    Attributes:
+        Valid (MoveValidity): Indicates the move satisfies all legality checks.
+        Invalid (MoveValidity): Indicates the move violates base legality checks
+        MovingIntoCheck (MoveValidity): Indicates the move would leave the king in check.
+        StayingInCheck (MoveValidity): Indicates the move fails to escape an existing check.
+    """
     Valid = 1
     Invalid = 2
     MovingIntoCheck = 3
@@ -33,10 +40,21 @@ class MoveValidity(Enum):
             return 'Invalid -- must move out of check.'
 
 class UndoException(Exception):
-    """Exception raised when an undo operation cannot be performed."""
+    """Exception raised when an undo operation cannot be performed.
+
+    This exception is used when attempting to revert a move that does not
+    have sufficient history to support undoing the action.
+    """
 
 class ChessModel:
-    """Game Engine responsible for move validation, execution, and status."""
+    """Game Engine responsible for move validation, execution, and status.
+
+    Attributes:
+        board (list[list[ChessPiece | None]]): Active pieces arranged by board square.
+        message_code (MoveValidity): Outcome of the most recent validiation.
+        ncols (int): Number of columns on the chess board.
+        nrows (int): Number of rows on the chess board.
+    """
     def __init__(self):
         """Initialize a new chess model with the standard setup."""
         self.__player = Player.WHITE

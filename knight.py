@@ -2,6 +2,11 @@ from chess_piece import ChessPiece
 from move import Move
 
 class Knight(ChessPiece):
+    """Represents a Knight piece.
+
+    Attributes:
+        player (Player): Owner of the Knight.
+    """
     def __init__(self, player):
         """Initialize a knight chess piece.
 

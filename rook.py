@@ -2,6 +2,11 @@ from chess_piece import ChessPiece
 from move import Move
 
 class Rook(ChessPiece):
+    """Represents a Rook piece.
+
+    Attributes:
+        player (Player): Owner of the Rook.
+    """
     def __init__(self, player):
         """Initialize a rook chess piece.
 

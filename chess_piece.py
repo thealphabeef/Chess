@@ -3,6 +3,11 @@ from move import Move
 from player import Player
 
 class ChessPiece(ABC):
+    """Abstract base class for all chess pieces.
+
+    Attributes:
+        player (Player): Owner of the piece.
+    """
     def __init__(self, player: Player):
         """Initialize a chess piece.
 

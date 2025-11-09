@@ -2,6 +2,11 @@ from chess_piece import ChessPiece
 from move import Move
 
 class Bishop(ChessPiece):
+    """Represents a Bishop piece.
+
+    Attributes:
+        player (Player): Owner of the Bishop.
+    """
     def __init__(self, player):
         """Initialize a bishop chess piece.
 

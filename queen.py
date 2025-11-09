@@ -2,6 +2,11 @@ from chess_piece import ChessPiece
 from move import Move
 
 class Queen(ChessPiece):
+    """Represents a Queen piece.
+
+    Attributes:
+        player (Player): Owner of the Queen.
+    """
     def __init__(self, player):
         """Initialize a queen chess piece.
 
