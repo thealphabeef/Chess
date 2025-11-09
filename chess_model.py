@@ -1,6 +1,5 @@
 from enum import Enum
 from player import Player
-from move import Move
 from chess_piece import ChessPiece
 from pawn import Pawn
 from rook import Rook
@@ -42,18 +41,36 @@ class MoveValidity(Enum):
 class UndoException(Exception):
     """Exception raised when an undo operation cannot be performed.
 
-    This exception is used when attempting to revert a move that does not
-    have sufficient history to support undoing the action.
+    Attributes:
+        message (str): Explanation of why the undo failed.
     """
+
+    def __init__(self, message: str):
+        """Initializes a new instance for the UndoException instance.
+
+        Args:
+            message (str): Explanation of why the undo failed.
+        """
+        super().__init__(message)
+        self.message = message
+
+    def __str__(self):
+        """Returns the exception in a readable format for the user.
+
+        Returns:
+            message (str): The stored error message.
+        """
+
+        return self.message
 
 class ChessModel:
     """Game Engine responsible for move validation, execution, and status.
 
     Attributes:
         board (list[list[ChessPiece | None]]): Active pieces arranged by board square.
-        message_code (MoveValidity): Outcome of the most recent validiation.
-        ncols (int): Number of columns on the chess board.
-        nrows (int): Number of rows on the chess board.
+        __message_code (MoveValidity): Outcome of the most recent validiation.
+        __ncols (int): Number of columns on the chess board.
+        __nrows (int): Number of rows on the chess board.
     """
     def __init__(self):
         """Initialize a new chess model with the standard setup."""
