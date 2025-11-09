@@ -67,6 +67,10 @@ class GUI:
                     running = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     x, y = pg.mouse.get_pos()
+
+                    if not self.__is_on_board(x, y):
+                        self._piece_selected = False
+                        continue
                     y, x = self.__get_coords__(y, x)
                     piece = self.__model.piece_at(y, x)
                     if not self._piece_selected and piece:
@@ -127,6 +131,10 @@ class GUI:
         grid_x = x // IMAGE_SIZE
         grid_y = y // IMAGE_SIZE
         return grid_y, grid_x
+
+    def __is_on_board(self, x: int, y: int) -> bool:
+        board_size = IMAGE_SIZE * 8
+        return 0 <= x < board_size and 0 <= y < board_size
 
     def __draw_board__(self) -> None:
         count = 0
