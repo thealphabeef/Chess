@@ -10,44 +10,80 @@ from king import King
 from move import Move
 
 class AI:
-    def __init__(self, player: Player) -> None:
-        self.__player = player
-        self.__opponent = Player.BLACK if player == Player.WHITE else player.WHITE
+    def __init__(self, model, player: Player) -> None:
+        self._player = player
+        self._model = model
         self._piece_values = {
             'Pawn': 1,
             'Knight': 3,
             'Bishop': 3,
             'Rook': 5,
             'Queen': 9,
-            'King': 1000
+            'King': 1000,
         }
 
-    def try_move(self):
-        for row in self.board:
-            for col in self.board:
-                legal, code = self._assess_move(row, col)
-                if legal:
-                    if self.piece == Pawn:
-                        if Pawn.is_valid_move(self.move(row, col, row+2,col+2), self.board):
-                            self.piece[row][col] = self.piece[row+2][col+2]
-                        else:
-                            self.piece[row][col] = self.piece[row+1][col+1]
-                    elif self.piece = Knight:
-                        if Knight.is_valid_move(move,board):
-                            self.piece[row][col] = self.piece[new_row][new_col]
-                    #continue with the rest of the pieces
-                    else:
-                        pass
-                elif legal == StayingInCheck:
-                    #if we are in check and the current move we are
-                    #looking at would still keep us in check then we have to continue to find another move.
+    def choose_move(self):
+
+        #make sure we only try to move when it is actually our turn
+        if self._model.current_player != self._player:
+            return None
+
+        best_capture = None
+        first_legal = None
+
+        #step 1: scan every square on the board
+        for from_row in range(self._model.nrows):
+            for from_col in range(self._model.ncols):
+                piece = self._model.board[from_row, from_col]
+
+                #skip empty squares and the opponent's pieces.
+                if piece is None or piece.player != self._player:
                     continue
-                elif legal == Invalid:
-                    #probably would happen if our move would take us out of bounds.
-                    continue
-                else:
-                    #this would mean that we are moving into check
-                    pass
+
+                #step 2: try moving that piece to every other square.
+                for to_row in range(self._model.nrows):
+                    for to_col in range(self._model.ncols):
+                        #ignore the trivial 'move' that keeps the piece still
+                        if from_row == to_row and from_col == to_col:
+                            continue
+
+                        candidate = Move(from_row, from_col, to_row, to_col)
+
+                        #ask the model if the move is legal without changing the board
+                        legal, _ = self._model.assess_move(candidate)
+                        if not legal:
+                            continue
+
+                        #remember the first legal move so we always return something
+                        if first_legal is None:
+                            first_legal = candidate
+
+                        #check whether we could capture a piece on the destination square
+                        target = self._model.board[to_row][to_col]
+                        if target is None:
+                            #no capture means no need to evaluate further - continue scanning
+                            continue
+
+                        #convert the class name into a numeric value
+                        target_value = self._piece_values.get(target.__class__.__name, 0)
+
+                        # if this capture is better than the best we have seen so far, remember it
+                        if best_capture is None or target_value > best_capture[0]:
+                            best_capture = (target_value, candidate)
+
+        if best_capture is not None:
+            return best_capture[1]
+        return first_legal
+
+    def make_move(self) -> bool:
+        #find a move to play
+        move = self.choose_move()
+        if move is None:
+            return False
+
+        #hand the move back to the model so it performs the normal bookkeeping
+        return self._model.move(move)
+
 
 
 
@@ -125,6 +161,10 @@ class ChessModel:
         #initialize board
         self.board = [[None] * self.__ncols for _ in range(self.__nrows)]
         self.initialize_board()
+
+        #initialize AI that will play as black
+        self._ai_player = Player.BLACK
+        self.AI_player = AI(self, self.__player)
 
     #Read Only Properties
     @property
@@ -234,7 +274,21 @@ class ChessModel:
         self.__move_history.append(history_entry)
 
         self.set_next_player()
+        self._trigger_ai_move_if_needed()
         return True
+
+    def _trigger_ai_move_if_needed(self):
+        """Ask the AI to respond when it is it's turn."""
+        if self.AI_player is None:
+            return
+
+        if self.__player != self._ai_player:
+            return
+
+        #let the AI try to move; we ignore the return value because it simply
+        #indicates whether a move was available, which does not change the game flow.
+
+        self.AI_player.make_move()
 
     def _assess_move(self, move: Move) -> tuple[bool, MoveValidity]:
         """Evaluate a move without mutating persistent state.
