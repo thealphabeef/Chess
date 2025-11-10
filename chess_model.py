@@ -10,6 +10,13 @@ from king import King
 from move import Move
 
 class AI:
+    """A default constructor for the opposing AI opponent.
+
+    Attributes:
+        _player (Player): What player the AI opponent will be assigned to
+        _model: Copy of the game state for the AI to read from
+        _piece_values (dict): Serialized structure storing the piece type with the associated value.
+    """
     def __init__(self, model, player: Player) -> None:
         self._player = player
         self._model = model
@@ -23,7 +30,11 @@ class AI:
         }
 
     def choose_move(self):
+        """Have the AI choose and return the first legal move present
 
+        Returns:
+            first_legal (Move): The first legal move present that would pass our base checks.
+        """
         #make sure we only try to move when it is actually our turn
         if self._model.current_player != self._player:
             return None
@@ -34,7 +45,7 @@ class AI:
         #step 1: scan every square on the board
         for from_row in range(self._model.nrows):
             for from_col in range(self._model.ncols):
-                piece = self._model.board[from_row, from_col]
+                piece = self._model.board[from_row][from_col]
 
                 #skip empty squares and the opponent's pieces.
                 if piece is None or piece.player != self._player:
@@ -50,7 +61,7 @@ class AI:
                         candidate = Move(from_row, from_col, to_row, to_col)
 
                         #ask the model if the move is legal without changing the board
-                        legal, _ = self._model.assess_move(candidate)
+                        legal, _ = self._model._assess_move(candidate)
                         if not legal:
                             continue
 
@@ -65,7 +76,7 @@ class AI:
                             continue
 
                         #convert the class name into a numeric value
-                        target_value = self._piece_values.get(target.__class__.__name, 0)
+                        target_value = self._piece_values.get(target.__class__.__name__, 0)
 
                         # if this capture is better than the best we have seen so far, remember it
                         if best_capture is None or target_value > best_capture[0]:
@@ -76,6 +87,11 @@ class AI:
         return first_legal
 
     def make_move(self) -> bool:
+        """Perform the move given if there is one possible.
+
+        Returns:
+            bool: ''"True"'' if a move is possible, ''"False"'' otherwise.
+        """
         #find a move to play
         move = self.choose_move()
         if move is None:
@@ -83,9 +99,6 @@ class AI:
 
         #hand the move back to the model so it performs the normal bookkeeping
         return self._model.move(move)
-
-
-
 
 class MoveValidity(Enum):
     """Enumeration describing the result of validating a potential move.
@@ -164,7 +177,7 @@ class ChessModel:
 
         #initialize AI that will play as black
         self._ai_player = Player.BLACK
-        self.AI_player = AI(self, self.__player)
+        self.AI_player = AI(self, self._ai_player)
 
     #Read Only Properties
     @property
