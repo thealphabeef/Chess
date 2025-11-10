@@ -29,15 +29,22 @@ class GUI:
         self._screen = pg.display.set_mode((800, 600))
         pg.display.set_caption("Laker Chess")
         self._ui_manager = gui.UIManager((800, 600))
+        self._font = {'name': 'noto_sans', 'point_size': 14, 'style': 'bold', 'antialiased': '1'} #somewhere to store the font we want to use
         self._side_box = gui.elements.UITextBox('<b>Laker Chess</b><br /><br />White moves first.<br />',
-                                                relative_rect=pg.Rect((500, 100), (400, 500)),
+                                                relative_rect=pg.Rect((415, 0), (400, 800)),
                                                 manager=self._ui_manager)
-        self._undo_button = gui.elements.UIButton(relative_rect = pg.Rect((700, 50), (100, 50)),
+        self._undo_button = gui.elements.UIButton(relative_rect = pg.Rect((0, 425), (120, 180)),
                                                   text='Undo',
                                                   manager=self._ui_manager)
-        self._restart_button = gui.elements.UIButton(relative_rect = pg.Rect((600, 50), (100, 50)),
+        self._restart_button = gui.elements.UIButton(relative_rect = pg.Rect((110, 425), (110, 180)),
                                                      text='Reset',
                                                      manager=self._ui_manager)
+        self._castle_button = gui.elements.UIButton(relative_rect=pg.Rect((210, 425), (110, 180)),
+                                                     text='Castle',
+                                                     manager=self._ui_manager)
+        self._AI_toggle = gui.elements.UIButton(relative_rect=pg.Rect((310, 425), (110, 180)),
+                                                    text='AI Toggle',
+                                                    manager=self._ui_manager)
         self._piece_selected = False
         self._first_selected = (0, 0)
         self._second_selected = (0, 0)
@@ -110,7 +117,7 @@ class GUI:
                 if event.type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == self._restart_button:
                         self.__model = ChessModel()
-                        self._side_box.set_text("Restarting game...<br />")
+                        self._side_box.set_text("<b>Laker Chess</b><br /><br />White moves first.<br /></n>Restarting game...<br />") # reset text box
                     if event.ui_element == self._undo_button:
                         try:
                             self.__model.undo()
@@ -119,7 +126,7 @@ class GUI:
                             self._side_box.append_html_text(f'{e}<br />')
             self._ui_manager.process_events(event)
 
-            self._screen.fill((255, 255, 255))
+            self._screen.fill((80, 67, 57)) #FOR BACKGROUND COLOR
             self.__draw_board__()
             self._ui_manager.draw_ui(self._screen)
             self._ui_manager.update(time_delta)
