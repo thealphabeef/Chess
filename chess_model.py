@@ -9,6 +9,48 @@ from queen import Queen
 from king import King
 from move import Move
 
+class AI:
+    def __init__(self, player: Player) -> None:
+        self.__player = player
+        self.__opponent = Player.BLACK if player == Player.WHITE else player.WHITE
+        self._piece_values = {
+            'Pawn': 1,
+            'Knight': 3,
+            'Bishop': 3,
+            'Rook': 5,
+            'Queen': 9,
+            'King': 1000
+        }
+
+    def try_move(self):
+        for row in self.board:
+            for col in self.board:
+                legal, code = self._assess_move(row, col)
+                if legal:
+                    if self.piece == Pawn:
+                        if Pawn.is_valid_move(self.move(row, col, row+2,col+2), self.board):
+                            self.piece[row][col] = self.piece[row+2][col+2]
+                        else:
+                            self.piece[row][col] = self.piece[row+1][col+1]
+                    elif self.piece = Knight:
+                        if Knight.is_valid_move(move,board):
+                            self.piece[row][col] = self.piece[new_row][new_col]
+                    #continue with the rest of the pieces
+                    else:
+                        pass
+                elif legal == StayingInCheck:
+                    #if we are in check and the current move we are
+                    #looking at would still keep us in check then we have to continue to find another move.
+                    continue
+                elif legal == Invalid:
+                    #probably would happen if our move would take us out of bounds.
+                    continue
+                else:
+                    #this would mean that we are moving into check
+                    pass
+
+
+
 class MoveValidity(Enum):
     """Enumeration describing the result of validating a potential move.
 
