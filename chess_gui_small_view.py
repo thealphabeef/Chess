@@ -100,7 +100,7 @@ class GUI:
                             self._side_box.append_html_text(msg + '<br />')
                         
                         else:
-                            self._side_box.append_html_text(f'{self.__model.message_code}<br />') # CHANGED THIS LINE self.__model.messageCode to message_code
+                            self._side_box.append_html_text(f'{self.__model.message_code}<br />') # CHANGED THIS LINE from messageCode to message_code
                         incheck = self.__model.in_check(self.__model.current_player)
                         complete = self.__model.is_complete()
 
