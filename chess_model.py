@@ -18,6 +18,7 @@ class AI:
         _piece_values (dict): Serialized structure storing the piece type with the associated value.
     """
     def __init__(self, model, player: Player) -> None:
+        """Initialize a new AI player."""
         self._player = player
         self._model = model
         self._piece_values = {
@@ -207,12 +208,14 @@ class ChessModel:
         Returns:
             bool: ''True'' if the game is over (checkmate or stalemate), ''False'' otherwise.
         """
+        #iterate over every square to find a piece that belongs to the current player
         for r in range(self.__nrows):
             for c in range(self.__ncols):
                 piece = self.board[r][c]
                 if piece is None or piece.player != self.__player:
                     continue
 
+                #once we have a friendly piece, try every possible destination
                 for tr in range(self.__nrows):
                     for tc in range(self.__ncols):
                         piece = self.board[r][c]
@@ -252,16 +255,19 @@ class ChessModel:
         Returns:
             bool: ''True'' if the move was performed, ''False'' otherwise.
         """
+        #validate before making any irreversible board changes
         legal, code = self._assess_move(move)
         self.__message_code = code
 
         if not legal:
             return False
 
+        #extract the pieces involved so we can record and mutate safely
         piece = self.board[move.from_row][move.from_col]
         captured_piece = self.board[move.to_row][move.to_col]
         piece_snapshot = self._snapshot_piece_state(piece)
 
+        #record the details necessary to undo the move later
         history_entry = {
             'move': move,
             'piece': piece,
@@ -274,9 +280,12 @@ class ChessModel:
 
         if isinstance(piece, Pawn):
             piece.first_move = False
+            #promotion check lives here so that we can story the original pawn
+            #state in the history entry before swapping in a new queen
             if (piece.player == Player.WHITE and move.to_row == 0) or (
                 piece.player == Player.BLACK and move.to_row == self.__nrows - 1
             ):
+                #promote pawns that reach the back row
                 self.board[move.to_row][move.to_col] = Queen(piece.player)
                 history_entry['promotion'] = True
             else:
@@ -313,11 +322,13 @@ class ChessModel:
             tuple[bool, MoveValidity]: Pair of legality flag and explanatory code.
         """
         fr, fc, tr, tc = move.from_row, move.from_col, move.to_row, move.to_col
-
+    
+        #reject coordinates that fall outside the board
         if not (0 <= fr < self.__nrows and 0 <= fc < self.__ncols and
                 0 <= tr < self.__nrows and 0 <= tc < self.__ncols):
             return False, MoveValidity.Invalid
 
+        #ensure a piece exists at the origin and belongs to the current player
         piece = self.board[fr][fc]
         if piece is None or piece.player != self.__player:
             return False, MoveValidity.Invalid
@@ -332,6 +343,7 @@ class ChessModel:
 
         currently_in_check = self.in_check(piece.player)
 
+        #temporarily apply the move to see whether it exposes the king
         self.board[fr][fc] = None
         self.board[tr][tc] = piece
         still_in_check = self.in_check(piece.player)
@@ -536,7 +548,6 @@ class ChessModel:
         self.board[0] = [Rook(Player.BLACK), Knight(Player.BLACK), Bishop(Player.BLACK), Queen(Player.BLACK),
                          King(Player.BLACK), Bishop(Player.BLACK), Knight(Player.BLACK), Rook(Player.BLACK)]
         self.board[1] = [Pawn(Player.BLACK) for col in range(self.ncols)]
-
 
         #WHITE ROWS
         self.board[7] = [Rook(Player.WHITE), Knight(Player.WHITE), Bishop(Player.WHITE), Queen(Player.WHITE),
