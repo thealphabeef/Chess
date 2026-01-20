@@ -1,10 +1,10 @@
-# ♟️ Chess Game with Toggleable AI (Python)
+# Chess Game with Toggleable AI (Python)
 
 A fully playable **chess application built in Python** featuring a graphical user interface and a **toggleable AI opponent**. The project emphasizes **object-oriented design**, **game-state management**, and **AI decision-making**, while providing a clean, interactive player experience.
 
 ---
 
-## 🚀 Features
+## Features
 
 - Complete chess ruleset:
   - Legal move validation
@@ -20,7 +20,7 @@ A fully playable **chess application built in Python** featuring a graphical use
 
 ---
 
-## 🧠 AI Overview
+## AI Overview
 
 The AI operates as an independent module and can be toggled on or off during gameplay.  
 It evaluates board positions and selects moves based on:
@@ -33,7 +33,7 @@ This design allows the AI to be extended or replaced without modifying core game
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Language:** Python  
 - **Libraries:**  
